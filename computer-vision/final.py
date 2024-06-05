@@ -1,23 +1,31 @@
+import cv2
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import tkinter as tk
+import numpy as np
+from keras._tf_keras.keras.preprocessing.image import ImageDataGenerator
+from keras._tf_keras.keras.applications import MobileNet
+from keras._tf_keras.keras.models import Sequential
+from keras._tf_keras.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from keras._tf_keras.keras.models import load_model
+from tkinter import filedialog
+from PIL import Image, ImageTk
+
 ##################
 # primeira parte #
 ##################
 
-import tensorflow as tf
-import matplotlib.pyplot as plt
-
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
 # Visualizando algumas imagens
-for i in range(9):
-    plt.subplot(330 + 1 + i)
-    plt.imshow(x_train[i])
-plt.show()
+# for i in range(9):
+#     plt.subplot(330 + 1 + i)
+#     plt.imshow(x_train[i])
+# plt.show()
 
 ##################
 # segunda parte #
 ##################
-
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 datagen = ImageDataGenerator(
     rescale=1.0/255.0,
@@ -31,15 +39,11 @@ datagen = ImageDataGenerator(
 # terceira parte #
 ##################
 
-from tensorflow.keras.applications import MobileNet
 model = MobileNet(weights='imagenet')
 
 ##################
 # quarta parte #
 ##################
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 
 model = Sequential([
     Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
@@ -71,14 +75,9 @@ def classify_image(model, image):
 # quinta parte #
 ##################
 
-from tensorflow.keras.models import load_model
-
 model.save('my_model.h5')
 model = load_model('my_model.h5')
 
-import tkinter as tk
-from tkinter import filedialog
-from PIL import Image, ImageTk
 
 def load_image():
     file_path = filedialog.askopenfilename()
