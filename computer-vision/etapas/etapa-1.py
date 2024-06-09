@@ -1,4 +1,4 @@
-# etapa 1.1
+# Etapa 1.1
 
 import tensorflow as tf
 import numpy as np
@@ -43,7 +43,7 @@ x_test = x_test.astype('float32') / 255.0
 y_train = tf.keras.utils.to_categorical(y_train, 10)
 y_test = tf.keras.utils.to_categorical(y_test, 10)
 
-## etapa 1.2 ##
+## Etapa 1.2 ##
 
 from keras._tf_keras.keras.applications import MobileNetV2
 from keras._tf_keras.keras.models import Model
@@ -57,6 +57,10 @@ base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(32,
 for layer in base_model.layers:
     layer.trainable = False
 
+# Descongelar as últimas 10 camadas do modelo base
+for layer in base_model.layers[-10:]:
+    layer.trainable = True
+
 # Adicionar camadas no topo do modelo base
 x = base_model.output
 x = GlobalAveragePooling2D()(x)
@@ -66,8 +70,11 @@ predictions = Dense(10, activation='softmax')(x)
 # Criar o modelo final
 model = Model(inputs=base_model.input, outputs=predictions)
 
+# Ajustar a taxa de aprendizado
+optimizer = Adam(learning_rate=1e-4)
+
 # Compilar o modelo
-model.compile(optimizer=Adam(), loss='categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Treinar o modelo
 model.fit(x_train, y_train, epochs=10, validation_data=(x_test, y_test))
