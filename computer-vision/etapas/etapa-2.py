@@ -25,29 +25,48 @@ def classify_image(model, image):
     predicted_class = np.argmax(prediction)
     return class_names[predicted_class]
 
-# Interface Gráfica com Tkinter
+# Função para carregar imagem
 def load_image():
+    global panel, result_label
     file_path = filedialog.askopenfilename()
-    image = Image.open(file_path)
-    image = image.resize((200, 200))
-    image = ImageTk.PhotoImage(image)
-    panel = tk.Label(root, image=image)
-    panel.image = image
-    panel.pack()
-    
-    # Classificar a imagem
-    img_cv2 = cv2.imread(file_path)
-    label = classify_image(model, img_cv2)
-    result_label.config(text="Resultado: " + label)
+    if file_path:
+        image = Image.open(file_path)
+        image = image.resize((200, 200))
+        image = ImageTk.PhotoImage(image)
+        if panel is not None:
+            panel.config(image=image)
+            panel.image = image
+        else:
+            panel = tk.Label(root, image=image)
+            panel.image = image
+            panel.pack()
+        
+        # Classificar a imagem
+        img_cv2 = cv2.imread(file_path)
+        label = classify_image(model, img_cv2)
+        result_label.config(text="Resultado: " + label)
+
+# Função para remover imagem
+def remove_image():
+    global panel, result_label
+    if panel is not None:
+        panel.config(image='')
+        panel.image = None
+        result_label.config(text="Resultado: ")
 
 root = tk.Tk()
 root.title("Classificação de Imagens")
 root.geometry("300x400")
 
-button = tk.Button(root, text="Carregar Imagem", command=load_image)
-button.pack()
+panel = None
+
+button_load = tk.Button(root, text="Carregar Imagem", command=load_image)
+button_load.pack(pady=10)
+
+button_remove = tk.Button(root, text="Remover Imagem", command=remove_image)
+button_remove.pack(pady=10)
 
 result_label = tk.Label(root, text="Resultado: ")
-result_label.pack()
+result_label.pack(pady=10)
 
 root.mainloop()
