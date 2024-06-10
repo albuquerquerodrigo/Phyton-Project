@@ -45,21 +45,17 @@ y_test = tf.keras.utils.to_categorical(y_test, 10)
 
 ## Etapa 1.2 ##
 
-from keras._tf_keras.keras.applications import MobileNetV2
+from keras._tf_keras.keras.applications import DenseNet121
 from keras._tf_keras.keras.models import Model
 from keras._tf_keras.keras.layers import Dense, GlobalAveragePooling2D
 from keras._tf_keras.keras.optimizers import Adam
 
 # Carregar o modelo base
-base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(32, 32, 3))
+base_model = DenseNet121(weights='imagenet', include_top=False, input_shape=(32, 32, 3))
 
 # Congelar as camadas do modelo base
 for layer in base_model.layers:
     layer.trainable = False
-
-# Descongelar as últimas 10 camadas do modelo base
-for layer in base_model.layers[-10:]:
-    layer.trainable = True
 
 # Adicionar camadas no topo do modelo base
 x = base_model.output
@@ -70,14 +66,11 @@ predictions = Dense(10, activation='softmax')(x)
 # Criar o modelo final
 model = Model(inputs=base_model.input, outputs=predictions)
 
-# Ajustar a taxa de aprendizado
-optimizer = Adam(learning_rate=1e-4)
-
 # Compilar o modelo
-model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer=Adam(), loss='categorical_crossentropy', metrics=['accuracy'])
 
-# Treinar o modelo
+# Treinar o modelo por 10 épocas
 model.fit(x_train, y_train, epochs=10, validation_data=(x_test, y_test))
 
 # Salvar o modelo treinado
-model.save('cifar10_model.h5')
+model.save('cifar10_model_with_densenet.h5')
