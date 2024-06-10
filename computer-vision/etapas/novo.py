@@ -1,12 +1,10 @@
 import tensorflow as tf
 import numpy as np
 import pickle
-from keras.preprocessing.image import ImageDataGenerator
 from keras.applications import DenseNet121
 from keras.models import Model
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.optimizers import Adam
-from keras.regularizers import l2
 
 def unpickle(file):
     with open(file, 'rb') as fo:
@@ -45,15 +43,6 @@ x_test = x_test.astype('float32') / 255.0
 y_train = tf.keras.utils.to_categorical(y_train, 10)
 y_test = tf.keras.utils.to_categorical(y_test, 10)
 
-# Augmentation de dados
-datagen = ImageDataGenerator(
-    rotation_range=20,
-    width_shift_range=0.1,
-    height_shift_range=0.1,
-    horizontal_flip=True,
-    vertical_flip=False
-)
-
 # Carregar o modelo base
 base_model = DenseNet121(weights='imagenet', include_top=False, input_shape=(32, 32, 3))
 
@@ -64,7 +53,7 @@ for layer in base_model.layers:
 # Adicionar camadas no topo do modelo base
 x = base_model.output
 x = GlobalAveragePooling2D()(x)
-x = Dense(1024, activation='relu', kernel_regularizer=l2(0.001))(x)  # Regularização L2
+x = Dense(512, activation='relu')(x)  # Diminuir o número de neurônios para 512
 predictions = Dense(10, activation='softmax')(x)
 
 # Criar o modelo final
@@ -73,10 +62,8 @@ model = Model(inputs=base_model.input, outputs=predictions)
 # Compilar o modelo
 model.compile(optimizer=Adam(), loss='categorical_crossentropy', metrics=['accuracy'])
 
-# Treinar o modelo com data augmentation por 10 épocas
-model.fit(datagen.flow(x_train, y_train, batch_size=32),
-          steps_per_epoch=len(x_train) / 32, epochs=10,
-          validation_data=(x_test, y_test))
+# Treinar o modelo por 10 épocas
+model.fit(x_train, y_train, epochs=10, validation_data=(x_test, y_test))
 
 # Salvar o modelo treinado
-model.save('cifar10_model_with_densenet_augmentation.h5')
+model.save('cifar10_model_with_densenet_less_neurons.h5')
